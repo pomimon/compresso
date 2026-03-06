@@ -371,7 +371,7 @@
 <body>
 
   <header>
-    <h1>Compresso</h1>
+    <h1>lz4-tool</h1>
     <p>decompress &amp; compress · mozLz4 &amp; standard LZ4</p>
   </header>
 
@@ -406,13 +406,13 @@
 
         <div class="stats" id="decompressStats">
           <div class="stat">
-            <span class="stat__value" data-in></span>compressed
+            <span class="stat__value" data-in></span><br>compressed
           </div>
           <div class="stat">
-            <span class="stat__value" data-out></span>decompressed
+            <span class="stat__value" data-out></span><br>decompressed
           </div>
           <div class="stat">
-            <span class="stat__value" data-ratio></span>ratio
+            <span class="stat__value" data-ratio></span><br>ratio
           </div>
         </div>
 
@@ -453,13 +453,13 @@
 
         <div class="stats" id="compressStats">
           <div class="stat">
-            <span class="stat__value" data-in></span>original
+            <span class="stat__value" data-in></span><br>original
           </div>
           <div class="stat">
-            <span class="stat__value" data-out></span>compressed
+            <span class="stat__value" data-out></span><br>compressed
           </div>
           <div class="stat">
-            <span class="stat__value" data-ratio></span>ratio
+            <span class="stat__value" data-ratio></span><br>ratio
           </div>
         </div>
 
@@ -920,7 +920,8 @@
     function showStats(container, inBytes, outBytes) {
       container.querySelector('[data-in]').textContent    = fmtBytes(inBytes);
       container.querySelector('[data-out]').textContent   = fmtBytes(outBytes);
-      container.querySelector('[data-ratio]').textContent = `${(inBytes / outBytes).toFixed(2)}×`;
+      const ratio = Math.max(inBytes, outBytes) / Math.min(inBytes, outBytes);
+      container.querySelector('[data-ratio]').textContent = `${ratio.toFixed(2)}×`;
       container.classList.add('stats--visible');
     }
 
@@ -941,8 +942,13 @@
     const copyBtn         = document.getElementById('copyBtn');
 
     let decompressedBytes = null;
+    let selectedFile = null;
+
+    // Browsers can restore file input state between sessions — clear it on load.
+    fileInput.value = '';
 
     function onFileSelected(file) {
+      selectedFile = file;
       fileChosen.textContent = file.name;
       fileChosen.style.display = 'block';
       decompressBtn.disabled = false;
@@ -970,7 +976,7 @@
     });
 
     decompressBtn.addEventListener('click', () => {
-      const file = fileInput.files[0];
+      const file = selectedFile;
       if (!file) return;
 
       const reader = new FileReader();
@@ -1024,7 +1030,7 @@
 
     downloadJsonBtn.addEventListener('click', () => {
       if (!decompressedBytes) return;
-      const base = (fileInput.files[0]?.name ?? 'output')
+      const base = (selectedFile?.name ?? 'output')
         .replace(/\.(jsonlz4|baklz4|lz4)$/, '');
       download(decompressedBytes, `${base}.json`);
     });
