@@ -1035,11 +1035,22 @@
       download(decompressedBytes, `${base}.json`);
     });
 
+    let timeout = undefined
     copyBtn.addEventListener('click', async () => {
       if (!decompressedBytes) return;
+
+      if (timeout) {
+        timeout = clearTimeout(timeout);
+      }
+
       await navigator.clipboard.writeText(new TextDecoder().decode(decompressedBytes));
+
       copyBtn.textContent = '✓ copied';
-      setTimeout(() => { copyBtn.textContent = '⎘ copy'; }, 1500);
+
+      timeout = setTimeout(() => {
+        copyBtn.textContent = '⎘ copy';
+        timeout = undefined;
+      }, 1500);
     });
 
     // ── Compress ─────────────────────────────────────────────
