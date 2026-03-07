@@ -40,7 +40,7 @@
 
     /* ── Header ── */
     header {
-      max-width: 860px;
+      max-width: 1000px;
       margin: 0 auto 40px;
       padding-bottom: 20px;
       border-bottom: 1px solid var(--border);
@@ -63,16 +63,9 @@
     }
 
     /* ── Layout ── */
-    .grid {
-      max-width: 860px;
+    .wrap {
+      max-width: 1000px;
       margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 640px) {
-      .grid { grid-template-columns: 1fr; }
     }
 
     /* ── Card ── */
@@ -83,28 +76,45 @@
       overflow: hidden;
     }
 
-    .card__header {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
+    /* ── Tabs ── */
+    .tabs {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
     }
 
-    .card__title {
+    .tab {
+      flex: 1;
+      padding: 13px 18px;
+      background: none;
+      border: none;
       font-family: var(--mono);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: color 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
     }
 
-    .card__body {
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    .tab:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .tab--active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab + .tab {
+      border-left: 1px solid var(--border);
     }
 
     /* ── Badge ── */
@@ -116,12 +126,27 @@
       background: var(--accent-dim);
       color: var(--accent);
       border: 1px solid rgba(90, 240, 176, 0.2);
+      letter-spacing: 0;
+      text-transform: none;
+      font-weight: 400;
     }
 
     .badge--red {
       background: var(--red-dim);
       color: var(--red);
       border-color: rgba(240, 90, 90, 0.2);
+    }
+
+    /* ── Panels ── */
+    .panel {
+      display: none;
+      padding: 20px;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel--active {
+      display: flex;
     }
 
     /* ── Form elements ── */
@@ -162,7 +187,7 @@
       font-size: 11px;
       padding: 10px 12px;
       resize: vertical;
-      min-height: 120px;
+      min-height: 240px;
       line-height: 1.6;
     }
 
@@ -290,30 +315,67 @@
       flex: 1;
     }
 
-    /* ── Output ── */
-    .output {
+    /* ── Toggle ── */
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle__track {
+      position: relative;
+      width: 28px;
+      height: 16px;
+      background: var(--border-light);
+      border-radius: 8px;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .toggle input:checked + .toggle__track {
+      background: var(--accent);
+    }
+
+    .toggle__thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
       background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 10px 12px;
-      min-height: 80px;
-      max-height: 200px;
-      overflow-y: auto;
+      border-radius: 50%;
+      transition: transform 0.15s;
+    }
+
+    .toggle input:checked + .toggle__track .toggle__thumb {
+      transform: translateX(12px);
+    }
+
+    .toggle__label {
       font-family: var(--mono);
-      font-size: 11px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-all;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Output textarea ── */
+    .output {
+      color: var(--text);
     }
 
     .output--empty {
       color: var(--muted);
       opacity: 0.4;
     }
-
-    .output::-webkit-scrollbar        { width: 4px; }
-    .output::-webkit-scrollbar-track  { background: transparent; }
-    .output::-webkit-scrollbar-thumb  { background: var(--border-light); border-radius: 2px; }
 
     /* ── Status ── */
     .status {
@@ -372,23 +434,31 @@
 
   <header>
     <h1>Compresso</h1>
-    <p>decompress &amp; compress · mozLz4 &amp; standard LZ4</p>
+    <p>mozLz4 &amp; standard LZ4</p>
   </header>
 
-  <div class="grid">
-
-    <!-- Decompress -->
+  <div class="wrap">
     <div class="card">
-      <div class="card__header">
-        <span class="card__title">Decompress</span>
-        <span class="badge badge--red">→ JSON</span>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab tab--active" id="tabDecompress">
+          Decompress
+          <span class="badge badge--red">→ JSON</span>
+        </button>
+        <button class="tab" id="tabCompress">
+          Compress
+          <span class="badge">→ LZ4</span>
+        </button>
       </div>
-      <div class="card__body">
+
+      <!-- Decompress panel -->
+      <div class="panel panel--active" id="panelDecompress">
 
         <div>
-          <label>Input file (.lz4 · .jsonlz4)</label>
+          <label>Input file</label>
           <div class="drop-zone" id="dropZone">
-            <input type="file" id="fileInput" accept=".lz4,.jsonlz4,.baklz4">
+            <input type="file" id="fileInput" accept=".lz4,.jsonlz4,.baklz4,.mozlz4">
             <span class="drop-zone__icon">⬆</span>
             <p class="drop-zone__hint"><strong>Choose file</strong> or drag &amp; drop</p>
             <span class="drop-zone__filename" id="fileChosen"></span>
@@ -400,20 +470,23 @@
         <div class="status" id="decompressStatus"></div>
 
         <div>
-          <label>Output</label>
-          <div class="output output--empty" id="decompressOutput">—</div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <label style="margin-bottom:0">Output</label>
+            <label class="toggle" id="prettyToggleWrap" title="Toggle pretty print">
+              <input type="checkbox" id="prettyToggle" checked>
+              <span class="toggle__track">
+                <span class="toggle__thumb"></span>
+              </span>
+              <span class="toggle__label">pretty print</span>
+            </label>
+          </div>
+          <textarea class="output output--empty" id="decompressOutput" readonly>—</textarea>
         </div>
 
         <div class="stats" id="decompressStats">
-          <div class="stat">
-            <span class="stat__value" data-in></span><br>compressed
-          </div>
-          <div class="stat">
-            <span class="stat__value" data-out></span><br>decompressed
-          </div>
-          <div class="stat">
-            <span class="stat__value" data-ratio></span><br>ratio
-          </div>
+          <div class="stat"><span class="stat__value" data-in></span><br>compressed</div>
+          <div class="stat"><span class="stat__value" data-out></span><br>decompressed</div>
+          <div class="stat"><span class="stat__value" data-ratio></span><br>ratio</div>
         </div>
 
         <div class="btn-row">
@@ -422,15 +495,9 @@
         </div>
 
       </div>
-    </div>
 
-    <!-- Compress -->
-    <div class="card">
-      <div class="card__header">
-        <span class="card__title">Compress</span>
-        <span class="badge">→ LZ4</span>
-      </div>
-      <div class="card__body">
+      <!-- Compress panel -->
+      <div class="panel" id="panelCompress">
 
         <div>
           <label>Format</label>
@@ -452,22 +519,16 @@
         <div class="status" id="compressStatus"></div>
 
         <div class="stats" id="compressStats">
-          <div class="stat">
-            <span class="stat__value" data-in></span><br>original
-          </div>
-          <div class="stat">
-            <span class="stat__value" data-out></span><br>compressed
-          </div>
-          <div class="stat">
-            <span class="stat__value" data-ratio></span><br>ratio
-          </div>
+          <div class="stat"><span class="stat__value" data-in></span><br>original</div>
+          <div class="stat"><span class="stat__value" data-out></span><br>compressed</div>
+          <div class="stat"><span class="stat__value" data-ratio></span><br>ratio</div>
         </div>
 
         <button class="btn btn--ghost" id="downloadLz4Btn" disabled>↓ download compressed</button>
 
       </div>
-    </div>
 
+    </div>
   </div>
 
   <script>
@@ -504,7 +565,6 @@
     const FD_VERSION          = 0x40;
     const FD_VERSION_MASK     = 0xC0;
 
-    // Reusable scratch buffer — avoids per-call allocation during compression.
     const blockBuf = new Uint8Array(5 << 20);
 
     // ── Primitives ───────────────────────────────────────────
@@ -528,7 +588,6 @@
       buf[n+3] = (x >> 24) & 0xff;
     }
 
-    // 32-bit integer multiply without overflow (Emscripten pattern).
     function imul(a, b) {
       const ah = (a >>> 16) & 0xffff;
       const al = a & 0xffff;
@@ -537,7 +596,6 @@
       return (al * bl + (((ah * bl + al * bh) << 16) >>> 0)) | 0;
     }
 
-    // Crush a 32-bit sequence into a 16-bit hash table index.
     function hashU32(a) {
       a = (a + 2127912214 + (a << 12))   | 0;
       a = (a ^ -949894596 ^ (a >>> 19))  | 0;
@@ -549,7 +607,6 @@
     }
 
     // ── xxHash-32 ────────────────────────────────────────────
-    // Used only for the LZ4 frame header checksum.
 
     const P1 = 0x9e3779b1;
     const P2 = 0x85ebca77;
@@ -631,17 +688,13 @@
         }
         mLength += MIN_MATCH;
 
-        // Handle overlapping back-references correctly
         if (mOffset === 1) {
-          // Repeat single byte
           dst.fill(dst[dIndex - 1], dIndex, dIndex + mLength);
           dIndex += mLength;
         } else if (mOffset > mLength && mLength > 31) {
-          // Non-overlapping — safe to use copyWithin
           dst.copyWithin(dIndex, dIndex - mOffset, dIndex - mOffset + mLength);
           dIndex += mLength;
         } else {
-          // Overlapping — must copy byte-by-byte
           let i = dIndex - mOffset;
           const end = i + mLength;
           while (i < end) dst[dIndex++] = dst[i++];
@@ -665,12 +718,12 @@
         const seq  = readU32(src, sIndex);
         const hash = hashU32(seq);
 
-        const mIndex = hashTable[hash] - 1; // 0 = empty slot (stored as pos+1)
+        const mIndex = hashTable[hash] - 1;
         hashTable[hash] = sIndex + 1;
 
         const noMatch =
           mIndex < 0 ||
-          ((sIndex - mIndex) >>> 16) > 0 ||  // out of 64K window
+          ((sIndex - mIndex) >>> 16) > 0 ||
           readU32(src, mIndex) !== seq;
 
         if (noMatch) {
@@ -683,14 +736,12 @@
         const literalCount = sIndex - mAnchor;
         const mOffset      = sIndex - mIndex;
 
-        // Extend match past the initial 4 matched bytes
         let si = sIndex + MIN_MATCH;
         let mi = mIndex + MIN_MATCH;
         while (si < sEnd - SEARCH_LIMIT && src[si] === src[mi]) { si++; mi++; }
         const mLength = si - (sIndex + MIN_MATCH);
         sIndex = si;
 
-        // Write token
         const tokenByte = mLength < ML_MASK ? mLength : ML_MASK;
         if (literalCount >= RUN_MASK) {
           dst[dIndex++] = (RUN_MASK << ML_BITS) + tokenByte;
@@ -701,14 +752,11 @@
           dst[dIndex++] = (literalCount << ML_BITS) + tokenByte;
         }
 
-        // Write literals
         for (let i = 0; i < literalCount; i++) dst[dIndex++] = src[mAnchor + i];
 
-        // Write match offset (little-endian)
         dst[dIndex++] = mOffset & 0xff;
         dst[dIndex++] = (mOffset >> 8) & 0xff;
 
-        // Write extra match length bytes
         if (mLength >= ML_MASK) {
           let n = mLength - ML_MASK;
           while (n >= 0xff) { dst[dIndex++] = 0xff; n -= 0xff; }
@@ -718,10 +766,8 @@
         mAnchor = sIndex;
       }
 
-      // No matches found — caller should store block uncompressed
       if (mAnchor === 0) return 0;
 
-      // Write trailing literals
       const literalCount = sEnd - mAnchor;
       if (literalCount >= RUN_MASK) {
         dst[dIndex++] = RUN_MASK << ML_BITS;
@@ -757,7 +803,7 @@
       if (!BS_MAP[bsIdx]) throw new Error('Invalid block size index');
       if (useContentSize) return readU32(src, i);
 
-      i++; // skip header checksum
+      i++;
 
       let maxSize = 0;
       while (true) {
@@ -795,8 +841,8 @@
       const bsIdx = (src[si++] >> BS_SHIFT) & BS_MASK;
       if (!BS_MAP[bsIdx]) throw new Error('Invalid block size index');
 
-      if (useContentSize)     si += 8; // 64-bit stored content size
-      si++;                             // header checksum
+      if (useContentSize) si += 8;
+      si++;
 
       while (true) {
         let blockSize = readU32(src, si);
@@ -828,9 +874,9 @@
       let remaining = src.length;
 
       writeU32(dst, di, MAGIC_NUM);  di += 4;
-      dst[di++] = 0x60;                            // FLG: version + independent blocks
-      dst[di++] = BS_DEFAULT << BS_SHIFT;          // BD: block max size
-      dst[di++] = xxh32(0, dst, 4, di - 4) >> 8;  // HC: header checksum byte
+      dst[di++] = 0x60;
+      dst[di++] = BS_DEFAULT << BS_SHIFT;
+      dst[di++] = xxh32(0, dst, 4, di - 4) >> 8;
 
       hashTable.fill(0);
 
@@ -839,7 +885,6 @@
         const compSize  = compressBlock(src, blockBuf, si, blockSize, hashTable);
 
         if (compSize === 0 || compSize >= blockSize) {
-          // Block didn't compress — store it raw
           writeU32(dst, di, BS_UNCOMPRESSED | blockSize);
           di += 4;
           dst.set(src.subarray(si, si + blockSize), di);
@@ -855,7 +900,7 @@
         remaining -= blockSize;
       }
 
-      writeU32(dst, di, 0); // end mark
+      writeU32(dst, di, 0);
       di += 4;
 
       return di;
@@ -929,6 +974,27 @@
       container.classList.remove('stats--visible');
     }
 
+    // ── Tabs ─────────────────────────────────────────────────
+
+    const tabDecompress   = document.getElementById('tabDecompress');
+    const tabCompress     = document.getElementById('tabCompress');
+    const panelDecompress = document.getElementById('panelDecompress');
+    const panelCompress   = document.getElementById('panelCompress');
+
+    tabDecompress.addEventListener('click', () => {
+      tabDecompress.classList.add('tab--active');
+      tabCompress.classList.remove('tab--active');
+      panelDecompress.classList.add('panel--active');
+      panelCompress.classList.remove('panel--active');
+    });
+
+    tabCompress.addEventListener('click', () => {
+      tabCompress.classList.add('tab--active');
+      tabDecompress.classList.remove('tab--active');
+      panelCompress.classList.add('panel--active');
+      panelDecompress.classList.remove('panel--active');
+    });
+
     // ── Decompress ───────────────────────────────────────────
 
     const dropZone        = document.getElementById('dropZone');
@@ -942,14 +1008,24 @@
     const copyBtn         = document.getElementById('copyBtn');
 
     let decompressedBytes = null;
-    let selectedFile = null;
+    let selectedFile      = null;
 
     // Browsers can restore file input state between sessions — clear it on load.
     fileInput.value = '';
 
+    // Accepted extensions for validation on drop (picker uses accept= attribute).
+    const VALID_EXTENSIONS = /\.(lz4|jsonlz4|baklz4|mozlz4|json\.lz4|json\.mozlz4)$/i;
+
+    function formatLabel(filename) {
+      if (/\.(jsonlz4|baklz4|mozlz4|json\.mozlz4)$/i.test(filename)) return 'mozLz4';
+      if (/\.(lz4|json\.lz4)$/i.test(filename)) return 'LZ4 frame';
+      return null;
+    }
+
     function onFileSelected(file) {
       selectedFile = file;
-      fileChosen.textContent = file.name;
+      const fmt = formatLabel(file.name);
+      fileChosen.textContent = fmt ? `${file.name}  ·  ${fmt}` : file.name;
       fileChosen.style.display = 'block';
       decompressBtn.disabled = false;
       clearStatus(decompressStat);
@@ -968,11 +1044,41 @@
       e.preventDefault();
       dropZone.classList.remove('drop-zone--active');
       const file = e.dataTransfer.files[0];
-      if (file) onFileSelected(file);
+      if (!file) return;
+      if (!VALID_EXTENSIONS.test(file.name)) {
+        setStatus(decompressStat, 'err', `✕ Unsupported file type: ${file.name}`);
+        return;
+      }
+      onFileSelected(file);
     });
 
     fileInput.addEventListener('change', () => {
       if (fileInput.files[0]) onFileSelected(fileInput.files[0]);
+    });
+
+    const prettyToggle    = document.getElementById('prettyToggle');
+
+    function prettyPrint(text) {
+      try {
+        return JSON.stringify(JSON.parse(text), null, 2);
+      } catch {
+        return text;
+      }
+    }
+
+    function currentOutput() {
+      // Returns the text currently shown in the output box.
+      return decompressOut.value;
+    }
+
+    function renderOutput(rawText) {
+      decompressOut.value = prettyToggle.checked ? prettyPrint(rawText) : rawText;
+    }
+
+    // Re-render when toggle changes, if there's already a result.
+    prettyToggle.addEventListener('change', () => {
+      if (!decompressedBytes) return;
+      renderOutput(new TextDecoder().decode(decompressedBytes));
     });
 
     decompressBtn.addEventListener('click', () => {
@@ -988,7 +1094,6 @@
           let result;
 
           if (mozMagic.startsWith('mozLz40')) {
-            // mozLz4: 8-byte magic + 4-byte LE uncompressed size + raw LZ4 block
             const uncompressedSize =
               src[8] | src[9] << 8 | src[10] << 16 | src[11] << 24;
             const compressed = src.slice(12);
@@ -997,7 +1102,6 @@
             result = dst.slice(0, size);
 
           } else if (lz4Magic === 0x184D2204) {
-            // Standard LZ4 frame
             result = lz4.decompress(src);
 
           } else {
@@ -1007,7 +1111,8 @@
           }
 
           decompressedBytes = result;
-          decompressOut.textContent = new TextDecoder().decode(result);
+          const raw = new TextDecoder().decode(result);
+          renderOutput(raw);
           decompressOut.classList.remove('output--empty');
           setStatus(decompressStat, 'ok', '✓ Decompressed successfully');
           showStats(decompressStats, src.length, result.length);
@@ -1016,7 +1121,7 @@
 
         } catch (err) {
           decompressedBytes = null;
-          decompressOut.textContent = '—';
+          decompressOut.value = '—';
           decompressOut.classList.add('output--empty');
           setStatus(decompressStat, 'err', `✕ ${err.message}`);
           hideStats(decompressStats);
@@ -1031,26 +1136,18 @@
     downloadJsonBtn.addEventListener('click', () => {
       if (!decompressedBytes) return;
       const base = (selectedFile?.name ?? 'output')
-        .replace(/\.(jsonlz4|baklz4|lz4)$/, '');
-      download(decompressedBytes, `${base}.json`);
+        .replace(/\.(jsonlz4|baklz4|lz4|mozlz4)$/, '');
+      const bytes = new TextEncoder().encode(currentOutput());
+      download(bytes, `${base}.json`);
     });
 
-    let timeout = undefined
+    let copyTimeout;
     copyBtn.addEventListener('click', async () => {
       if (!decompressedBytes) return;
-
-      if (timeout) {
-        timeout = clearTimeout(timeout);
-      }
-
-      await navigator.clipboard.writeText(new TextDecoder().decode(decompressedBytes));
-
+      clearTimeout(copyTimeout);
+      await navigator.clipboard.writeText(currentOutput());
       copyBtn.textContent = '✓ copied';
-
-      timeout = setTimeout(() => {
-        copyBtn.textContent = '⎘ copy';
-        timeout = undefined;
-      }, 1500);
+      copyTimeout = setTimeout(() => { copyBtn.textContent = '⎘ copy'; }, 1500);
     });
 
     // ── Compress ─────────────────────────────────────────────
@@ -1077,7 +1174,6 @@
         let output;
 
         if (formatSelect.value === 'moz') {
-          // mozLz4: 8-byte magic + 4-byte LE uncompressed size + raw LZ4 block
           const magic     = new TextEncoder().encode('mozLz40\0');
           const bound     = Math.ceil(src.length + src.length / 255 + 16);
           const compBuf   = lz4.makeBuffer(bound);
@@ -1117,8 +1213,6 @@
       download(compressedBytes, compressedFilename);
     });
 
-    // readU32 helper accessible to UI (reused from lz4 scope via closure isn't possible,
-    // so we define a local copy for the magic number check)
     function readU32(buf, n) {
       return (buf[n] | buf[n+1] << 8 | buf[n+2] << 16 | buf[n+3] << 24) >>> 0;
     }
